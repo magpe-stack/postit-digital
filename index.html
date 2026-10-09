@@ -11,24 +11,23 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Post-it Digital">
 
+    <!-- Manifest e Favicons -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    <link rel="icon" type="image/png" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+
+    <!-- Fontes Google -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Frameworks externos (Tailwind CSS e Ícones Lucide) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .font-handwriting { font-family: 'Caveat', cursive; }
-        .postit-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 -2px 4px rgba(0, 0, 0, 0.04); }
-        .postit-shadow-hover:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: translateY(-2px); }
-        .bg-pattern { background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px); background-size: 16px 16px; }
-        .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 9999px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 9999px; }
-        .pin-head { background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-    </style>
+    <!-- Estilos customizados -->
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body class="h-full text-slate-800 bg-pattern flex flex-col min-h-screen">
     <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm px-4 py-3 sm:px-6">
@@ -115,82 +114,6 @@
         <span id="toastMessage">Ação concluída</span>
     </div>
 
-    <script>
-        const COLOR_PALETTES = [
-            { id: 'yellow', name: 'Amarelo', bg: 'bg-amber-100', border: 'border-amber-200', text: 'text-amber-950', circleBg: 'bg-amber-200' },
-            { id: 'blue', name: 'Azul', bg: 'bg-sky-100', border: 'border-sky-200', text: 'text-sky-950', circleBg: 'bg-sky-200' },
-            { id: 'green', name: 'Verde', bg: 'bg-emerald-100', border: 'border-emerald-200', text: 'text-emerald-950', circleBg: 'bg-emerald-200' },
-            { id: 'pink', name: 'Rosa', bg: 'bg-pink-100', border: 'border-pink-200', text: 'text-pink-950', circleBg: 'bg-pink-200' },
-            { id: 'purple', name: 'Roxo', bg: 'bg-purple-100', border: 'border-purple-200', text: 'text-purple-950', circleBg: 'bg-purple-200' },
-            { id: 'orange', name: 'Laranja', bg: 'bg-orange-100', border: 'border-orange-200', text: 'text-orange-950', circleBg: 'bg-orange-200' },
-            { id: 'slate', name: 'Cinza', bg: 'bg-slate-200', border: 'border-slate-300', text: 'text-slate-900', circleBg: 'bg-slate-300' }
-        ];
-
-        let state = { notes: [], viewMode: 'grid', selectedColor: 'yellow', useHandwritingFont: false, filterQuery: '' };
-        const notesContainer = document.getElementById('notesContainer');
-        const emptyState = document.getElementById('emptyState');
-        const searchInput = document.getElementById('searchInput');
-        const noteCountEl = document.getElementById('noteCount');
-
-        window.addEventListener('DOMContentLoaded', () => {
-            loadState(); renderColorSelectors(); renderNotes(); lucide.createIcons(); setupPWA();
-        });
-
-        function loadState() {
-            try {
-                const saved = localStorage.getItem('postit_notes');
-                if (saved) { state.notes = JSON.parse(saved); }
-                else {
-                    state.notes = [{ id: 'demo-1', content: '✨ Bem-vindo ao seu Post-it Digital!', color: 'yellow', date: formatDate() }];
-                    saveNotes();
-                }
-            } catch(e) {}
-        }
-        function saveNotes() { localStorage.setItem('postit_notes', JSON.stringify(state.notes)); }
-        function formatDate() { const d = new Date(); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }
-        function renderColorSelectors() {
-            document.getElementById('colorSelectorContainer').innerHTML = COLOR_PALETTES.map(p => `<button onclick="selectDefaultColor('${p.id}')" class="w-6 h-6 rounded-full ${p.circleBg} border-2 ${state.selectedColor === p.id ? 'border-slate-800 scale-110' : 'border-transparent'} transition-all"></button>`).join('');
-        }
-        function selectDefaultColor(id) { state.selectedColor = id; renderColorSelectors(); }
-        function createNewNote() {
-            const n = { id: 'note-' + Date.now(), content: '', color: state.selectedColor, date: formatDate() };
-            state.notes.unshift(n); saveNotes(); renderNotes();
-        }
-        function updateNoteContent(id, val) { const n = state.notes.find(x => x.id === id); if(n) { n.content = val; saveNotes(); } }
-        function deleteNote(id) { state.notes = state.notes.filter(x => x.id !== id); saveNotes(); renderNotes(); }
-        function clearAllNotes() { if(confirm('Apagar todas as notas?')) { state.notes = []; saveNotes(); renderNotes(); } }
-        function setViewMode(m) { state.viewMode = m; renderNotes(); }
-        function toggleFont() { state.useHandwritingFont = !state.useHandwritingFont; renderNotes(); }
-        function filterNotes() { state.filterQuery = searchInput.value.toLowerCase(); renderNotes(); }
-        function getColorObj(id) { return COLOR_PALETTES.find(c => c.id === id) || COLOR_PALETTES[0]; }
-        
-        function renderNotes() {
-            const list = state.notes.filter(n => n.content.toLowerCase().includes(state.filterQuery));
-            noteCountEl.textContent = `${list.length} post-its`;
-            if(!list.length) { notesContainer.innerHTML = ''; emptyState.classList.remove('hidden'); return; }
-            emptyState.classList.add('hidden');
-            notesContainer.className = state.viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 pb-20" : "flex flex-nowrap overflow-x-auto gap-5 pb-8 custom-scrollbar";
-            const fontClass = state.useHandwritingFont ? 'font-handwriting text-xl' : 'text-sm';
-            
-            notesContainer.innerHTML = list.map(n => {
-                const c = getColorObj(n.color);
-                return `<div class="${state.viewMode==='inline'?'w-[300px] flex-shrink-0':'w-full'} flex flex-col justify-between rounded-xl ${c.bg} ${c.text} border ${c.border} postit-shadow p-4 min-h-[240px]">
-                    <div class="flex justify-between items-center text-xs opacity-70 mb-2 pb-2 border-b border-black/10">
-                        <span>${n.date}</span>
-                        <button onclick="deleteNote('${n.id}')" class="text-red-700 hover:text-red-900">Excluir</button>
-                    </div>
-                    <textarea oninput="updateNoteContent('${n.id}', this.value)" class="w-full flex-1 bg-transparent resize-none outline-none ${fontClass}" placeholder="Digite sua nota...">${n.content}</textarea>
-                </div>`;
-            }).join('');
-            lucide.createIcons();
-        }
-
-        function setupPWA() {
-            if ('serviceWorker' in navigator) {
-                const sw = "self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));";
-                navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], {type:'application/javascript'})));
-            }
-        }
-    </script>
+    <script src="./app.js"></script>
 </body>
 </html>
