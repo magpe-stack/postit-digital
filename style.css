@@ -1,0 +1,43 @@
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+.font-handwriting { 
+    font-family: 'Caveat', cursive; 
+}
+
+.postit-shadow { 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 -2px 4px rgba(0, 0, 0, 0.04); 
+}
+
+.postit-shadow-hover:hover { 
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+    transform: translateY(-2px); 
+}
+
+.bg-pattern { 
+    background-color: #f8fafc; 
+    background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px); 
+    background-size: 16px 16px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar { 
+    height: 8px; 
+    width: 8px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: rgba(0,0,0,0.05); 
+    border-radius: 9999px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: rgba(0,0,0,0.2); 
+    border-radius: 9999px; 
+}
+
+.pin-head { 
+    background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b); 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+}
