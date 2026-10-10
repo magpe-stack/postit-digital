@@ -153,11 +153,13 @@ function getColorObj(id) {
 function showToast(msg) {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toastMessage');
-    toastMessage.textContent = msg;
-    toast.classList.remove('opacity-0', 'pointer-events-none');
-    setTimeout(() => {
-        toast.classList.add('opacity-0', 'pointer-events-none');
-    }, 2500);
+    if (toast && toastMessage) {
+        toastMessage.textContent = msg;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'pointer-events-none');
+        }, 2500);
+    }
 }
 
 function renderNotes() {
@@ -239,4 +241,52 @@ function installPWA() {
             deferredPrompt = null;
         });
     }
+}
+
+// --- FUNÇÕES DE BACKUP LOCAL PARA O POST-IT DIGITAL ---
+
+// Exportar/Baixar Backup de todas as notas do Post-it Digital em arquivo .json
+function exportBackupFile() {
+    const dataToExport = {
+        notes: state.notes || []
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+    const downloadAnchor = document.createElement('a');
+    
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `postit_digital_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+
+    showToast("Backup salvo com sucesso!");
+}
+
+// Importar/Restaurar Backup do arquivo .json salvo na sua pasta
+function importBackupFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // Suporta tanto o formato { notes: [...] } quanto uma lista direta de notas
+            const notesList = importedData.notes || (Array.isArray(importedData) ? importedData : null);
+
+            if (notesList && Array.isArray(notesList)) {
+                state.notes = notesList;
+                saveNotes();
+                renderNotes();
+                showToast("Backup restaurado com sucesso!");
+            } else {
+                alert('⚠️ O arquivo selecionado não contém um backup válido do Post-it.');
+            }
+        } catch (err) {
+            alert('⚠️ Ocorreu um erro ao ler o arquivo de backup.');
+        }
+    };
+    reader.readAsText(file);
 }
